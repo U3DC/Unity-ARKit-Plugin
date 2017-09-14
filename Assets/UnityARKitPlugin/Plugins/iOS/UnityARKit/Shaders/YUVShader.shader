@@ -44,11 +44,11 @@ Shader "Unlit/ARCameraShader"
 				o.position = UnityObjectToClipPos(vertex.position); 
 				if (_isPortrait == 1)
 				{
-					o.texcoord = float2(vertex.texcoord.x, -(vertex.texcoord.y - 0.5f) * _texCoordScale + 0.5f);
+					o.texcoord = float2((vertex.texcoord.x - 0.5f) / _texCoordScale + 0.5f, 1 - vertex.texcoord.y);
 				}
 				else
 				{
-					o.texcoord = float2((vertex.texcoord.x - 0.5f) * _texCoordScale + 0.5f, -vertex.texcoord.y);
+					o.texcoord = float2(vertex.texcoord.x, -(vertex.texcoord.y - 0.5f) / _texCoordScale + 0.5f);
 				}
 				o.texcoord = mul(_TextureRotation, float4(o.texcoord,0,1)).xy;
 	            
