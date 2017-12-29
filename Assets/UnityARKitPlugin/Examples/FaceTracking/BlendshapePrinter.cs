@@ -5,7 +5,7 @@ using UnityEngine.XR.iOS;
 
 public class BlendshapePrinter : MonoBehaviour {
 
-	bool enabled = false;
+	bool shapeEnabled = false;
 	Dictionary<string, float> currentBlendShapes;
 
 	// Use this for initialization
@@ -18,7 +18,7 @@ public class BlendshapePrinter : MonoBehaviour {
 
 	void OnGUI()
 	{
-		if (enabled) {
+		if (shapeEnabled) {
 
 			string blendshapes = "";
 			string shapeNames = "";
@@ -48,7 +48,7 @@ public class BlendshapePrinter : MonoBehaviour {
 
 	void FaceAdded (ARFaceAnchor anchorData)
 	{
-		enabled = true;
+		shapeEnabled = true;
 		currentBlendShapes = anchorData.blendShapes;
 	}
 
@@ -59,7 +59,7 @@ public class BlendshapePrinter : MonoBehaviour {
 
 	void FaceRemoved (ARFaceAnchor anchorData)
 	{
-		enabled = false;
+		shapeEnabled = false;
 	}
 
 	
