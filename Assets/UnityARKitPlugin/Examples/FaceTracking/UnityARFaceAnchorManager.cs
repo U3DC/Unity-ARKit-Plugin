@@ -29,7 +29,6 @@ public class UnityARFaceAnchorManager : MonoBehaviour {
 
 		}
 
-
 	}
 
 	void FaceAdded (ARFaceAnchor anchorData)
@@ -41,8 +40,16 @@ public class UnityARFaceAnchorManager : MonoBehaviour {
 
 	void FaceUpdated (ARFaceAnchor anchorData)
 	{
-		anchorPrefab.transform.position = UnityARMatrixOps.GetPosition (anchorData.transform);
-		anchorPrefab.transform.rotation = UnityARMatrixOps.GetRotation (anchorData.transform);
+		if (anchorPrefab.activeSelf != anchorData.isTracked) 
+		{
+			anchorPrefab.SetActive (anchorData.isTracked);
+		}
+
+		if (anchorData.isTracked) 
+		{
+			anchorPrefab.transform.position = UnityARMatrixOps.GetPosition (anchorData.transform);
+			anchorPrefab.transform.rotation = UnityARMatrixOps.GetRotation (anchorData.transform);
+		}
 	}
 
 	void FaceRemoved (ARFaceAnchor anchorData)

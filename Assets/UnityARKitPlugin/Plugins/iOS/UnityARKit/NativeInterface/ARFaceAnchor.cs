@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System;
 using System.Collections.Generic;
 using AOT;
+using System.Text;
 
 namespace UnityEngine.XR.iOS
 {
@@ -89,10 +90,11 @@ namespace UnityEngine.XR.iOS
 
 		public UnityARFaceGeometry faceGeometry;
 		public IntPtr blendShapes;
+		public bool isTracked;   //this is from the new ARTrackable protocol that ARFaceAnchor now subscribes to
 
 	};
 
-
+	#if !UNITY_EDITOR && UNITY_IOS
 	public class ARFaceGeometry
 	{
 		private UnityARFaceGeometry uFaceGeometry;
@@ -166,7 +168,6 @@ namespace UnityEngine.XR.iOS
 		}
 	}
 
-
 	public class ARFaceAnchor 
 	{
 		private UnityARFaceAnchorData faceAnchorData;
@@ -182,6 +183,8 @@ namespace UnityEngine.XR.iOS
 		
 
 		public string identifierStr { get { return faceAnchorData.identifierStr; } }
+
+		public bool isTracked { get { return faceAnchorData.isTracked; } }
 
 		public Matrix4x4 transform { 
 			get { 
@@ -217,4 +220,5 @@ namespace UnityEngine.XR.iOS
 			blendshapesDictionary.Add(key, value);
 		}
 	}
+	#endif
 }
