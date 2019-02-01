@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Name: UnityLogoWhiteOnBlack
   m_EditorClassIdentifier: 
   imageName: unitywhiteonblack
-  imageTexture: {fileID: 2800000, guid: 6555c379d9fde4526acf041ad664b57d, type: 3}
+  imageTexture: {fileID: 2800000, guid: f5f7b2e9e954b4a78ab3ac63fb17fb9c, type: 3}
   physicalSize: 0.06

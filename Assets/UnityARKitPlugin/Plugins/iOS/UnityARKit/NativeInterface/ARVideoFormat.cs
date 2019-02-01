@@ -16,11 +16,17 @@ namespace UnityEngine.XR.iOS
 		public int framesPerSecond;
 
 		#if UNITY_EDITOR
-		private static void EnumerateVideoFormats(VideoFormatEnumerator videoFormatEnumerator) {
+		private static void EnumerateVideoFormats(VideoFormatEnumerator videoFormatEnumerator) 
+		{
+		}
+		private static void EnumerateFaceTrackingVideoFormats(VideoFormatEnumerator videoFormatEnumerator) 
+		{
 		}
 		#else
 		[DllImport("__Internal")]
 		private static extern void EnumerateVideoFormats(VideoFormatEnumerator videoFormatEnumerator);
+		[DllImport("__Internal")]
+		private static extern void EnumerateFaceTrackingVideoFormats(VideoFormatEnumerator videoFormatEnumerator);
 		#endif
 
 		static List<UnityARVideoFormat> videoFormatsList;
@@ -29,6 +35,14 @@ namespace UnityEngine.XR.iOS
 		{
 			videoFormatsList = new List<UnityARVideoFormat> ();
 			EnumerateVideoFormats (AddToVFList);
+
+			return videoFormatsList;
+		}
+
+		public static List<UnityARVideoFormat> SupportedFaceTrackingVideoFormats()
+		{
+			videoFormatsList = new List<UnityARVideoFormat> ();
+			EnumerateFaceTrackingVideoFormats(AddToVFList);
 
 			return videoFormatsList;
 		}

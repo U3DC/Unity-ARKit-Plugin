@@ -50,7 +50,6 @@ namespace UnityEngine.XR.iOS
 		void InitializeARKit(serializableARKitInit sai)
 		{
 			#if !UNITY_EDITOR
-
 			//get the config and runoption from editor and use them to initialize arkit on device
 			Application.targetFrameRate = 60;
 			m_session = UnityARSessionNativeInterface.GetARSessionNativeInterface();
@@ -62,14 +61,12 @@ namespace UnityEngine.XR.iOS
 			UnityARSessionNativeInterface.ARAnchorAddedEvent += ARAnchorAdded;
 			UnityARSessionNativeInterface.ARAnchorUpdatedEvent += ARAnchorUpdated;
 			UnityARSessionNativeInterface.ARAnchorRemovedEvent += ARAnchorRemoved;
-
 			#endif
 		}
 
 		void InitializeARKitFaceTracking(serializableARKitInit sai)
 		{
 			#if !UNITY_EDITOR
-
 			//get the config and runoption from editor and use them to initialize arkit for facetracking on device
 			Application.targetFrameRate = 60;
 			m_session = UnityARSessionNativeInterface.GetARSessionNativeInterface();
@@ -81,15 +78,15 @@ namespace UnityEngine.XR.iOS
 			UnityARSessionNativeInterface.ARFaceAnchorAddedEvent += ARFaceAnchorAdded;
 			UnityARSessionNativeInterface.ARFaceAnchorUpdatedEvent += ARFaceAnchorUpdated;
 			UnityARSessionNativeInterface.ARFaceAnchorRemovedEvent += ARFaceAnchorRemoved;
-
 			#endif
 		}
 
 		public void ARFrameUpdated(UnityARCamera camera)
 		{
+			#if !UNITY_EDITOR
 			serializableUnityARCamera serARCamera = camera;
 			SendToEditor(ConnectionMessageIds.updateCameraFrameMsgId, serARCamera);
-
+			#endif
 		}
 
 		public void ARAnchorAdded(ARPlaneAnchor planeAnchor)

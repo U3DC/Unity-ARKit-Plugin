@@ -24,7 +24,7 @@ public class GenerateImageAnchor : MonoBehaviour {
 
 	void AddImageAnchor(ARImageAnchor arImageAnchor)
 	{
-		Debug.Log ("image anchor added");
+		Debug.LogFormat("image anchor added[{0}] : tracked => {1}", arImageAnchor.identifier, arImageAnchor.isTracked);
 		if (arImageAnchor.referenceImageName == referenceImage.imageName) {
 			Vector3 position = UnityARMatrixOps.GetPosition (arImageAnchor.transform);
 			Quaternion rotation = UnityARMatrixOps.GetRotation (arImageAnchor.transform);
@@ -35,17 +35,28 @@ public class GenerateImageAnchor : MonoBehaviour {
 
 	void UpdateImageAnchor(ARImageAnchor arImageAnchor)
 	{
-		Debug.Log ("image anchor updated");
+		Debug.LogFormat("image anchor updated[{0}] : tracked => {1}", arImageAnchor.identifier, arImageAnchor.isTracked);
 		if (arImageAnchor.referenceImageName == referenceImage.imageName) {
-			imageAnchorGO.transform.position = UnityARMatrixOps.GetPosition (arImageAnchor.transform);
-			imageAnchorGO.transform.rotation = UnityARMatrixOps.GetRotation (arImageAnchor.transform);
-		}
+            if (arImageAnchor.isTracked)
+            {
+                if (!imageAnchorGO.activeSelf)
+                {
+                    imageAnchorGO.SetActive(true);
+                }
+                imageAnchorGO.transform.position = UnityARMatrixOps.GetPosition(arImageAnchor.transform);
+                imageAnchorGO.transform.rotation = UnityARMatrixOps.GetRotation(arImageAnchor.transform);
+            }
+            else if (imageAnchorGO.activeSelf)
+            {
+                imageAnchorGO.SetActive(false);
+            }
+        }
 
 	}
 
 	void RemoveImageAnchor(ARImageAnchor arImageAnchor)
 	{
-		Debug.Log ("image anchor removed");
+		Debug.LogFormat("image anchor removed[{0}] : tracked => {1}", arImageAnchor.identifier, arImageAnchor.isTracked);
 		if (imageAnchorGO) {
 			GameObject.Destroy (imageAnchorGO);
 		}

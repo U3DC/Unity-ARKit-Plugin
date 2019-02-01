@@ -142,10 +142,17 @@ namespace UnityEngine.UI
 				// Update rects since other things might affect them even if value didn't change.
 				UpdateVisuals();
 			}
-			
+
+			#if UNITY_2018_3_OR_NEWER
+			//handle new prefab API
+			var prefabType = UnityEditor.PrefabUtility.GetPrefabAssetType(this);
+			if (prefabType != UnityEditor.PrefabAssetType.Regular && !Application.isPlaying)
+				CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
+			#else
 			var prefabType = UnityEditor.PrefabUtility.GetPrefabType(this);
 			if (prefabType != UnityEditor.PrefabType.Prefab && !Application.isPlaying)
 				CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
+			#endif
 		}
 		
 		#endif // if UNITY_EDITOR

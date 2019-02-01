@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Name: UnityLogoReferenceImage
   m_EditorClassIdentifier: 
   imageName: unitylogoreferenceimage
-  imageTexture: {fileID: 2800000, guid: 7623d0c49e25a41139b08b7d6f89d95c, type: 3}
+  imageTexture: {fileID: 2800000, guid: fd3329f8ed29741c29b3bf4b0032cab9, type: 3}
   physicalSize: 0.06

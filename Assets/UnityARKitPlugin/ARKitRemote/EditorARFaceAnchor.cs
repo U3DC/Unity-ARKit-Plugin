@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
@@ -46,7 +46,32 @@ namespace UnityEngine.XR.iOS
 
 		public Dictionary<string, float> blendShapes { get { return m_sfa.arBlendShapes; } }
 
+		public Pose leftEyePose
+		{
+			get
+			{
+				return new Pose(Vector3.zero, Quaternion.identity);
+			}
+		}
+
+		public Pose rightEyePose
+		{
+			get
+			{
+				return new Pose(Vector3.zero, Quaternion.identity);
+			}
+		}
+
+		public Vector3 lookAtPoint
+		{
+			get
+			{
+				return Vector3.zero;
+			}
+		}
+
 		public bool isTracked { get { return m_sfa.isTracked; } }
+
 
 	}
 	#endif

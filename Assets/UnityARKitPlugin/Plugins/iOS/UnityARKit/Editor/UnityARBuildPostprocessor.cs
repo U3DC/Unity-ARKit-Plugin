@@ -15,6 +15,7 @@ using System;
 public class UnityARBuildPostprocessor
 {
     static List<ARReferenceImagesSet> imageSets = new List<ARReferenceImagesSet>();
+	static List<ARReferenceObjectsSetAsset> objectSets = new List<ARReferenceObjectsSetAsset>();
     // Build postprocessor. Currently only needed on:
     // - iOS: no dynamic libraries, so plugin source files have to be copied into Xcode project
     [PostProcessBuild]
@@ -37,6 +38,14 @@ public class UnityARBuildPostprocessor
                 imageSets.Add(ar);
             }
         }
+
+		foreach (ARReferenceObjectsSetAsset ar in UnityEngine.Resources.FindObjectsOfTypeAll<ARReferenceObjectsSetAsset>())
+		{
+			if (!objectSets.Contains(ar))
+			{
+				objectSets.Add(ar);
+			}
+		}
 
     }
 
@@ -96,11 +105,11 @@ public class UnityARBuildPostprocessor
 
 		ARResourceContents resourceContents = new ARResourceContents ();
 		resourceContents.info = new ARResourceInfo ();
-		resourceContents.info.author = "xcode";
+		resourceContents.info.author = "unity";
 		resourceContents.info.version = 1;
 
-		resourceContents.images = new ARResourceImage[1];
-		resourceContents.images [0] = new ARResourceImage ();
+		resourceContents.images = new ARResourceFilename[1];
+		resourceContents.images [0] = new ARResourceFilename ();
 		resourceContents.images [0].idiom = "universal";
 
 		resourceContents.properties = new ARResourceProperties ();
@@ -133,7 +142,7 @@ public class UnityARBuildPostprocessor
 		List<ARReferenceImage> processedImages = new List<ARReferenceImage> ();
 		ARResourceGroupContents groupContents = new ARResourceGroupContents();
 		groupContents.info = new ARResourceGroupInfo ();
-		groupContents.info.author = "xcode";
+		groupContents.info.author = "unity";
 		groupContents.info.version = 1;
 		string folderToCreate = "Unity-iPhone/Images.xcassets/" + aris.resourceGroupName + ".arresourcegroup";
 		string folderFullPath = Path.Combine (pathToBuiltProject, folderToCreate);
@@ -157,6 +166,135 @@ public class UnityARBuildPostprocessor
 		File.WriteAllText (contentsJsonPath, JsonUtility.ToJson (groupContents, true));
 		project.AddFile (contentsJsonPath, Path.Combine (folderToCreate, "Contents.json"));
 	}
+
+	static void AddReferenceObjectAssetToStreamingAssets(ARReferenceObjectAsset arro, string parentFolderFullPath, string projectRelativePath)
+	{
+
+		ARReferenceObjectResourceContents resourceContents = new ARReferenceObjectResourceContents ();
+		resourceContents.info = new ARResourceInfo ();
+		resourceContents.info.author = "unity";
+		resourceContents.info.version = 1;
+
+		resourceContents.objects = new ARResourceFilename[1];
+		resourceContents.objects [0] = new ARResourceFilename ();
+		resourceContents.objects [0].idiom = "universal";
+
+		resourceContents.referenceObjectName = arro.objectName;
+
+		//add folder for reference image
+		string folderToCreate = arro.objectName + ".arreferenceobject";
+		string folderFullPath = Path.Combine (parentFolderFullPath, folderToCreate);
+		string projectRelativeFolder = Path.Combine (projectRelativePath, folderToCreate);
+		Directory.CreateDirectory (folderFullPath);
+
+		//copy file from refobject asset
+		string objectPath = AssetDatabase.GetAssetPath(arro.referenceObject);
+		string objectFilename = Path.GetFileName (objectPath);
+		var dstPath = Path.Combine(folderFullPath, objectFilename);
+		File.Copy(objectPath, dstPath, true);
+		resourceContents.objects [0].filename = objectFilename;
+
+		//add contents.json file
+		string contentsJsonPath = Path.Combine(folderFullPath, "Contents.json");
+		File.WriteAllText (contentsJsonPath, JsonUtility.ToJson (resourceContents, true));
+	}
+
+	static void AddReferenceObjectsSetAssetToStreamingAssets(ARReferenceObjectsSetAsset aros, string pathToBuiltProject)
+	{
+		List<ARReferenceObjectAsset> processedObjects = new List<ARReferenceObjectAsset> ();
+		ARResourceGroupContents groupContents = new ARResourceGroupContents();
+		groupContents.info = new ARResourceGroupInfo ();
+		groupContents.info.author = "xcode";
+		groupContents.info.version = 1;
+		//On iOS, StreamingAssets end up at /Data/Raw
+		string folderToCreate = "Data/Raw/ARReferenceObjects/" + aros.resourceGroupName + ".arresourcegroup";
+		string folderFullPath = Path.Combine (pathToBuiltProject, folderToCreate);
+		Directory.CreateDirectory (folderFullPath);
+		foreach (ARReferenceObjectAsset arro in aros.referenceObjectAssets) {
+			if (!processedObjects.Contains (arro)) {
+				processedObjects.Add (arro); //get rid of dupes
+				AddReferenceObjectAssetToStreamingAssets(arro, folderFullPath, folderToCreate);
+			}
+		}
+
+		groupContents.resources = new ARResourceGroupResource[processedObjects.Count];
+		int index = 0;
+		foreach (ARReferenceObjectAsset arro in processedObjects) {
+			groupContents.resources [index] = new ARResourceGroupResource ();
+			groupContents.resources [index].filename = arro.objectName + ".arreferenceobject";
+			index++;
+		}
+		string contentsJsonPath = Path.Combine(folderFullPath, "Contents.json");
+		File.WriteAllText (contentsJsonPath, JsonUtility.ToJson (groupContents, true));
+	}
+
+
+	#if ARREFERENCEOBJECT_XCODE_ASSET_CATALOG
+	static void AddReferenceObjectAssetToResourceGroup(ARReferenceObjectAsset arro, string parentFolderFullPath, string projectRelativePath, PBXProject project)
+	{
+
+		ARReferenceObjectResourceContents resourceContents = new ARReferenceObjectResourceContents ();
+		resourceContents.info = new ARResourceInfo ();
+		resourceContents.info.author = "unity";
+		resourceContents.info.version = 1;
+
+		resourceContents.objects = new ARResourceFilename[1];
+		resourceContents.objects [0] = new ARResourceFilename ();
+		resourceContents.objects [0].idiom = "universal";
+
+		//add folder for reference image
+		string folderToCreate = arro.objectName + ".arreferenceobject";
+		string folderFullPath = Path.Combine (parentFolderFullPath, folderToCreate);
+		string projectRelativeFolder = Path.Combine (projectRelativePath, folderToCreate);
+		Directory.CreateDirectory (folderFullPath);
+		project.AddFolderReference (folderFullPath, projectRelativeFolder);
+
+		//copy file from texture asset
+		string objectPath = AssetDatabase.GetAssetPath(arro.referenceObject);
+		string objectFilename = Path.GetFileName (objectPath);
+		var dstPath = Path.Combine(folderFullPath, objectFilename);
+		File.Copy(objectPath, dstPath, true);
+		project.AddFile (dstPath, Path.Combine (projectRelativeFolder, objectFilename));
+		resourceContents.objects [0].filename = objectFilename;
+
+		//add contents.json file
+		string contentsJsonPath = Path.Combine(folderFullPath, "Contents.json");
+		File.WriteAllText (contentsJsonPath, JsonUtility.ToJson (resourceContents, true));
+		project.AddFile (contentsJsonPath, Path.Combine (projectRelativeFolder, "Contents.json"));
+
+	}
+
+	static void AddReferenceObjectsSetAssetToAssetCatalog(ARReferenceObjectsSetAsset aros, string pathToBuiltProject, PBXProject project)
+	{
+		List<ARReferenceObjectAsset> processedObjects = new List<ARReferenceObjectAsset> ();
+		ARResourceGroupContents groupContents = new ARResourceGroupContents();
+		groupContents.info = new ARResourceGroupInfo ();
+		groupContents.info.author = "xcode";
+		groupContents.info.version = 1;
+		string folderToCreate = "Unity-iPhone/Images.xcassets/" + aros.resourceGroupName + ".arresourcegroup";
+		string folderFullPath = Path.Combine (pathToBuiltProject, folderToCreate);
+		Directory.CreateDirectory (folderFullPath);
+		project.AddFolderReference (folderFullPath, folderToCreate);
+		foreach (ARReferenceObjectAsset arro in aros.referenceObjectAssets) {
+			if (!processedObjects.Contains (arro)) {
+				processedObjects.Add (arro); //get rid of dupes
+				AddReferenceObjectAssetToResourceGroup(arro, folderFullPath, folderToCreate, project);
+			}
+		}
+
+		groupContents.resources = new ARResourceGroupResource[processedObjects.Count];
+		int index = 0;
+		foreach (ARReferenceObjectAsset arro in processedObjects) {
+			groupContents.resources [index] = new ARResourceGroupResource ();
+			groupContents.resources [index].filename = arro.objectName + ".arreferenceobject";
+			index++;
+		}
+		string contentsJsonPath = Path.Combine(folderFullPath, "Contents.json");
+		File.WriteAllText (contentsJsonPath, JsonUtility.ToJson (groupContents, true));
+		project.AddFile (contentsJsonPath, Path.Combine (folderToCreate, "Contents.json"));
+	}
+	#endif //ARREFERENCEOBJECT_XCODE_ASSET_CATALOG
+
 #endif //UNITY_IOS
 
 	private static void OnPostprocessBuildIOS(string pathToBuiltProject)
@@ -195,11 +333,20 @@ public class UnityARBuildPostprocessor
 			// Add "arkit" plist entry
 			capsArray.AddString(arkitStr);
 		}
+
+		const string shareString = "UIFileSharingEnabled";
+		rootDict.SetBoolean(shareString, true);
+
 		File.WriteAllText(plistPath, plist.WriteToString());
 
 		foreach(ARReferenceImagesSet ar in imageSets)
 		{
 			AddReferenceImagesSetToAssetCatalog(ar, pathToBuiltProject, proj);
+		}
+
+		foreach(ARReferenceObjectsSetAsset objSet in objectSets)
+		{
+			AddReferenceObjectsSetAssetToStreamingAssets(objSet, pathToBuiltProject);
 		}
 
 		//TODO: remove this when XCode actool is able to handles ARResources despite deployment target

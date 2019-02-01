@@ -16,14 +16,41 @@ namespace UnityEngine.XR.iOS
 
 		}
 
+		public static Matrix4x4 GetMatrix(UnityARMatrix4x4 unityMatrix)
+		{
+			var matrix = new Matrix4x4();
+			matrix.SetColumn(0, unityMatrix.column0);
+			matrix.SetColumn(1, unityMatrix.column1);
+			matrix.SetColumn(2, unityMatrix.column2);
+			matrix.SetColumn(3, unityMatrix.column3);
+
+			return matrix;
+		}
+
+		public static UnityARMatrix4x4 GetMatrix(Matrix4x4 nativeMatrix)
+		{
+			var matrix = new UnityARMatrix4x4();
+			matrix.column0 = nativeMatrix.GetColumn(0);
+			matrix.column1 = nativeMatrix.GetColumn(1);
+			matrix.column2 = nativeMatrix.GetColumn(2);
+			matrix.column3 = nativeMatrix.GetColumn(3);
+
+			return matrix;
+		}
+
+		public static Pose GetPose(UnityARMatrix4x4 unityMatrix)
+		{
+			return GetPose(GetMatrix(unityMatrix));
+		}
+
+		public static Pose GetPose(Matrix4x4 matrix)
+		{
+			return new Pose(GetPosition(matrix), GetRotation(matrix));
+		}
+
 		public static Vector3 GetPosition(Matrix4x4 matrix)
 		{
-			// Convert from ARKit's right-handed coordinate
-			// system to Unity's left-handed
-			Vector3 position = matrix.GetColumn(3);
-			position.z = -position.z;
-
-			return position;
+			return GetPosition(matrix.GetColumn(3));
 		}
 
 		public static Quaternion GetRotation(Matrix4x4 matrix)
@@ -37,6 +64,13 @@ namespace UnityEngine.XR.iOS
 			return rotation;
 		}
 
+		public static Vector3 GetPosition(Vector3 position)
+		{
+			// Convert from ARKit's right-handed coordinate
+			// system to Unity's left-handed
+			position.z = -position.z;
+			return position;
+		}
 
 		static Quaternion QuaternionFromMatrix(Matrix4x4 m) {
 			// Adapted from: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
