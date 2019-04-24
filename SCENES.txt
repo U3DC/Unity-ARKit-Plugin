@@ -24,3 +24,20 @@ The main script used to implement the painting functionality is ParticlePainter.
 
 There is some external source for HSVPicker that was used for this example: https://github.com/judah4/HSV-Color-Picker-Unity
 
+UnityARBallz.unity:  This scene shows how to use colliders and rigidbodies with your augmented scene.
+
+Similar setup to original scene, with GeneratePlanes GO generating horizontal planes with collider that approximate horizontal surfaces discovered.  BallMaker script will generate "Ball" prefabs that are rigidbodies with speherical colliders that interact with each other as well as the planes that have been generated.  BallMover script generates a collider where your finger touches the plane, so that you can move the balls in the vicinity.
+
+UnityARShadows.unity: This scene shows how to use a material that can render shadows on real objects (mainly planes in this example) by using a shader that combines shadowmapping with blending.  
+
+The main change is the GeneratePlane GO creates instances of the shadowPlanePrefab that uses the shadowPlaneMaterial, which in turn uses MobileARShadow.shader.  You could also use this material on a plane that is attached to the foot of the object you want to create the shadow.  When running the scene, detect a plane, and use the hittest to place a "player" object on the plane.  The player object will display a shadow on the plane.
+
+UnityAROcclusion.unity: This scene shows how to occlude virtual objects by using an occluder material.
+
+GeneratePlanes GO now creates instances of an occluderPlanePrefab which uses uses an occlusionPlaneMaterial, which in turn uses a MobileOcclusion.shader. The material has its renderqueue set to "Geometry-10", and so renders before any other geometry in the scene.  The shader then writes to the depth buffer only, so any objects rendered behind this object will be rejected by the ztest and not render.
+
+
+UnityARUserAnchorScene:  This scene is an example of how someone could use the add/removeAnchor API.  As you tap around in the world, a checkered cube will be added 1 meter away from the front vector of the camera.  The cubes will start to disapear after 4 seconds.  
+
+A new component exists named UnityARUserAnchorComponent that you can add to GameObjects.  This component will automatically add/remove anchors to/from ARKit based on the object's lifecycle.  
+
