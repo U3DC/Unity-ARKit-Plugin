@@ -43,7 +43,133 @@ This contains the following APIs:
 	    public List<ARHitTestResult> HitTest(ARPoint point, ARHitTestResultType types)
 
 	    public ARTextureHandles GetARVideoTextureHandles()
+Unity-ARKit-Plugin
+[Latest Update: This plugin now supports new ARKit functionality exposed in ARKit 2.0. See Whats New In ARKit 2.0 for details.]
 
+This is a native Unity plugin that exposes the functionality of Apple’s ARKit SDK to your Unity projects for compatible iOS devices. Includes ARKit features such as world tracking, pass-through camera rendering, horizontal and vertical plane detection and update, face tracking (requires iPhone X), image anchors, point cloud extraction, light estimation, and hit testing API to Unity developers for their AR projects. This plugin is a preview quality build that will help you get up and running quickly, but the implementation and APIs are subject to change. Nevertheless, it is quite capable of creating a full featured ARKit app, and hundreds of ARKit apps on the AppStore already use this plugin.
+
+Please read LICENSE for licensing information.
+
+The code drop is a Unity project, compatible with Unity 2017.4 and later. It contains the plugin sources, example scenes, and components that you may use in your own projects. See TUTORIAL.txt for detailed setup instructions.
+
+Please feel free to extend the plugin and send pull requests. You may also provide feedback if you would like improvements or want to suggest changes. Happy coding and have fun!
+
+Requirements:
+Unity v2017.4+
+Apple Xcode 10.0+ with latest iOS SDK that contains ARKit Framework
+Apple iOS device that supports ARKit (iPhone 6S or later, iPad (2017) or later)
+Apple iOS 12+ installed on device
+Building
+Give it a go yourself. Open up UnityARKitScene.unity — a scene that demostrates ARKit’s basic functionality — and try building it to iOS. Note that UnityARBuildPostprocessor.cs is an editor script that executes at build time, and does some modifications to the XCode project that is exported by Unity. You could also try building the other example scenes in the subfolders of the Examples folder.
+
+API overview
+UnityARSessionNativeInterface.cs implements the following:
+
+public void RunWithConfigAndOptions( ARKitWorldTackingSessionConfiguration config, UnityARSessionRunOption runOptions )
+public void RunWithConfig( ARKitWorldTackingSessionConfiguration config )
+public void Pause()
+public List<ARHitTestResult> HitTest( ARPoint point, ARHitTestResultType types )
+public ARTextureHandles GetARVideoTextureHandles()
+public float GetARAmbientIntensity()
+public int GetARTrackingQuality() 
+It also contains events that you can provide these delegates for:
+
+public delegate void ARFrameUpdate( UnityARCamera camera )
+
+public delegate void ARAnchorAdded( ARPlaneAnchor anchorData )
+public delegate void ARAnchorUpdated( ARPlaneAnchor anchorData )
+public delegate void ARAnchorRemoved( ARPlaneAnchor anchorData )
+
+public delegate void ARUserAnchorAdded(ARUserAnchor anchorData)
+public delegate void ARUserAnchorUpdated(ARUserAnchor anchorData)
+public delegate void ARUserAnchorRemoved(ARUserAnchor anchorData)
+
+public delegate void ARFaceAnchorAdded(ARFaceAnchor anchorData)
+public delegate void ARFaceAnchorUpdated(ARFaceAnchor anchorData)
+public delegate void ARFaceAnchorRemoved(ARFaceAnchor anchorData)
+
+public delegate void ARImageAnchorAdded(ARImageAnchor anchorData)
+public delegate void ARImageAnchorUpdated(ARImageAnchor anchorData)
+public delegate void ARImageAnchorRemoved(ARImageAnchor anchorData)
+
+public delegate void ARSessionFailed( string error )
+public delegate void ARSessionCallback();
+public delegate void ARSessionTrackingChanged(UnityARCamera camera)
+These are the list of events you can subscribe to:
+
+public static event ARFrameUpdate ARFrameUpdatedEvent;
+
+public static event ARAnchorAdded ARAnchorAddedEvent;
+public static event ARAnchorUpdated ARAnchorUpdatedEvent;
+public static event ARAnchorRemoved ARAnchorRemovedEvent;
+
+public static event ARUserAnchorAdded ARUserAnchorAddedEvent;
+public static event ARUserAnchorUpdated ARUserAnchorUpdatedEvent;
+public static event ARUserAnchorRemoved ARUserAnchorRemovedEvent;
+
+public static event ARFaceAnchorAdded ARFaceAnchorAddedEvent;
+public static event ARFaceAnchorUpdated ARFaceAnchorUpdatedEvent;
+public static event ARFaceAnchorRemoved ARFaceAnchorRemovedEvent;
+
+public static event ARImageAnchorAdded ARImageAnchorAddedEvent;
+public static event ARImageAnchorUpdated ARImageAnchorUpdatedEvent;
+public static event ARImageAnchorRemoved ARImageAnchorRemovedEvent;
+
+public static event ARSessionFailed ARSessionFailedEvent;
+public static event ARSessionCallback ARSessionInterruptedEvent;
+public static event ARSessionCallback ARSessioninterruptionEndedEvent;
+public static event ARSessionTrackingChanged ARSessionTrackingChangedEvent;
+ARSessionNative.mm contains Objective-C code for directly interfacing with the ARKit SDK.
+
+All C# files in the NativeInterface folder beginning with “AR” are the scripting API equivalents of data structures exposed by ARKit.
+
+ARKit useful components
+Physical camera feed. Place this component on the physcial camera object. It will grab the textures needed for rendering the video, set it on the material needed for blitting to the backbuffer, and set up the command buffer to do the actual blit. UnityARVideo.cs
+
+Virtual camera manager. Place this component on a GameObject in the scene that references the virtual camera that you intend to control via ARKit. It will position and rotate the camera as well as provide the correct projection matrix to it based on updates from ARKit. This component also has the code to initialize an ARKit session. UnityARCameraManager.cs
+
+Plane anchor GameObjects. For each plane anchor detected, this component generates a GameObject which is instantiated from a referenced prefab and positioned, scaled and rotated according to plane detected. As the plane anchor updates and is removed, so is the corresponding GameObject. UnityARGeneratePlane.cs
+
+Point cloud visualizer. This component references a particle system prefab, maximum number of particles and size per particle to be able to visualize the point cloud as particles in space. PointCloudParticleExample.cs
+
+Hit test. This component references the root transform of a GameObject in the scene, and does an ARKit Hit Test against the scene wherever user touches on screen, and when hit successful (against HitTest result types enumerated in the script), moves the referenced GameObject to that hit point. UnityARHitTestExample.cs
+
+Light estimation. This component when added to a light in the scene will scale the intensity of that light to the estimated lighting in the real scene being viewed. UnityARAmbient.cs
+
+You can read how some of these components are used in the Examples scenes by checking out SCENES.txt.
+
+Feature documentation
+As newer features have been added on to the plugin, they have been documented in detail elsewhere. Here are links to those documents:
+
+Unity ARKit Remote
+“Introducing the Unity ARKit Remote”
+
+“ARKit Remote: Now with face tracking!"
+
+Face tracking
+“ARKit Face Tracking on iPhone X.” (Yes—It requires an iPhone X.)
+
+"Create your own animated emojis with Unity!"
+
+Plugin Settings file
+"ARKit uses Face Tracking API"
+
+"App requires ARKit device"
+
+ARKit 1.5 Update
+Unity blog post "Developing for ARKit 1.5 update using Unity ARKit Plugin"
+
+ARKit 2.0 Update
+How to use new features from Unity: Whats New In ARKit 2.0
+
+Questions? Bugs? Showcase?
+Contact us via the forums for questions.
+
+You may submit issues if you feel there are bugs that are not solved by asking on the forums.
+
+You may submit a pull request if you believe you have a useful enhancement for this plugin.
+
+Follow @jimmyjamjam for various AR related tweets, and showcase your creation there as well.
 	    public float GetARAmbientIntensity()
 
 	    public int GetARTrackingQuality()  
